@@ -8,7 +8,6 @@ st.set_page_config(
     layout="centered",
 )
 
-# カテゴリカラーパレット（動的に割り当て）
 _PALETTE = [
     "#e74c3c", "#8e44ad", "#2980b9", "#27ae60",
     "#f39c12", "#16a085", "#d35400", "#2c3e50",
@@ -62,13 +61,11 @@ def render_menu():
     st.markdown("輸血に関する各分野の問題をランダムに出題します。分野を選んで挑戦しましょう！")
     st.divider()
 
-    # 全問ボタン
     total = len(QUESTIONS)
     if st.button(f"⚪ すべて（{total}問）", use_container_width=True, key="btn_all"):
         start_quiz("すべて")
         st.rerun()
 
-    # 各カテゴリボタン（2列）
     cats = _all_cats()
     cols = st.columns(2)
     for i, cat in enumerate(cats):
@@ -95,7 +92,6 @@ def render_quiz():
     total = len(questions)
     is_multi = q.get("multi_answers") is not None
 
-    # ヘッダー
     col1, col2 = st.columns([3, 1])
     with col1:
         color = cat_color(q["category"])
@@ -137,12 +133,12 @@ def render_quiz():
     else:
         correct_set = set(q["multi_answers"])
         if not answered:
-            sel = st.multiselect(
-                "2つ選んでください",
-                options=list(range(len(q["choices"]))),
-                format_func=lambda i: q["choices"][i],
-                key="multi_sel",
-            )
+            sel = []
+            for ci, choice in enumerate(q["choices"]):
+                if st.checkbox(choice, key=f"chk_{ci}"):
+                    sel.append(ci)
+            if len(sel) > 2:
+                st.warning("2つだけ選んでください")
             if st.button("回答する", disabled=(len(sel) != 2)):
                 st.session_state.selected = sel
                 st.session_state.answered = True
